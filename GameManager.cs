@@ -1,17 +1,27 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+
 
 public class GameManager : MonoBehaviour {
 
+    // 레벨이 시작되기 전에 초 단위로 대기할 시간.
+    public float levelStartDelay = 2f;
     public float turnDelay = .1f;
     public static GameManager instance = null;
     public BoardManager boardScript;
     public int playerFoodPoints = 100;
+    public Button[] buttons;
     // public이지만 에디터에서 숨긴다.
     [HideInInspector] public bool playerTurn = true;
 
-    private int level = 3;
+    private Text levelText;
+    private GameObject levelImage;
+    // 게임 보드를 만드는 중인지 체크하고,
+    // 보드를 만드는 중에는 플레이어가 움직이는 것을 방지.
+    private bool doingSetup;
+    private int level = 1;
     private List<Enemy> enemies;
     private bool enemiesMoving;
 
@@ -28,20 +38,44 @@ public class GameManager : MonoBehaviour {
         InitGame();
 	}
 	
+    private void OnLevelWasLoaded(int index)
+    {
+        level++;
+
+        InitGame();
+    }
+
     void InitGame()
     {
+        // 타이틀 카드가 뜨는 동안 플레이어는 움직일 수 없음.
+        doingSetup = true;
+
+        levelImage = GameObject.Find("LevelImage");
+        levelText = GameObject.Find("LevelText").GetComponent<Text>();
+        levelText.text = "Day " + level;
+        levelImage.SetActive(true);
+        Invoke("HideLevelImage", levelStartDelay);
+
         enemies.Clear();
         boardScript.SetupScene(level);
     }
 
+    private void HideLevelImage()
+    {      
+        levelImage.SetActive(false);
+        doingSetup = false;
+    }
+
     public void GameOver()
     {
+        levelText.text = "After " + level + " days. you starved.";
+        levelImage.SetActive(true);
         enabled = false;
     }
 
     private void Update()
     {
-        if( playerTurn || enemiesMoving)
+        if( playerTurn || enemiesMoving || doingSetup)
         {
             return;
         }

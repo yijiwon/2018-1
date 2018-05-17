@@ -11,6 +11,8 @@ public class Enemy : MovingObject {
     // 적이 어디로 향할지 알려줌.
     private Transform target;
     private bool skipMove;
+    public AudioClip enemyAttack1;
+    public AudioClip enemyAttack2;
 
 	// Use this for initialization
 	protected override void Start () {
@@ -63,6 +65,7 @@ public class Enemy : MovingObject {
 
         animator.SetTrigger("enemyAttack");
 
+        SoundManager.instance.RandomizeSfx(enemyAttack1, enemyAttack2);
         hitPlayer.LoseFood(playerDamage);
     }
 }
